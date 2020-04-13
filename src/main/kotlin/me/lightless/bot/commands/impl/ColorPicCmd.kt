@@ -34,9 +34,9 @@ class ColorPicCmd : ICommand {
 
         val key = BotContext.botConfig!!.colorKey
 
+        val socksProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
         val url = "${api}&r18=${r18}&apikey=${key}"
         val response = withContext(Dispatchers.IO) {
-            val socksProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
             val connection = URL(url).openConnection(socksProxy)
             connection.getInputStream().reader().readText()
         }
@@ -70,7 +70,12 @@ class ColorPicCmd : ICommand {
 
         // 发送
         withContext(Dispatchers.IO) {
-            groupMessage.group.sendImage(URL(colorUrl))
+
+            val connection = URL(colorUrl).openConnection(socksProxy)
+            connection.addRequestProperty("Referer", "https://www.pixiv.net/")
+//            connection.addRequestProperty("User-Agent", "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36")
+            connection.addRequestProperty("User-Agent", "curl/7.67.0")
+            groupMessage.group.sendImage(connection.getInputStream())
             groupMessage.group.sendMessage(buildMessageChain {
                 add(
                     "Author: $author\nTitle: $title\npixiv id: $pid\n" +
