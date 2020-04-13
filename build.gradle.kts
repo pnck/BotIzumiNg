@@ -25,6 +25,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-core:2.13.1")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.1")
     implementation("org.yaml:snakeyaml:1.26")
+    implementation("com.beust:klaxon:5.0.1")
 }
 
 configure<JavaPluginConvention> {

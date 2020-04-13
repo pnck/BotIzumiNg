@@ -93,7 +93,7 @@ class CommandHandler {
         var findCommand = false
         commandsImpls.forEach {
             if (it.command.contains(msgArray[0]) && it.checkRole(groupMessage.sender.id)) {
-                it.handler(groupMessage)
+                it.handler(msgArray[0], groupMessage)
                 findCommand = true
             }
         }

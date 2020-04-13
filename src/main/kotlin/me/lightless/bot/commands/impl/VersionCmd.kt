@@ -17,11 +17,15 @@ class VersionCmd() : ICommand {
         return true
     }
 
-    override suspend fun handler(groupMessage: GroupMessage) {
+    override suspend fun handler(cmd: String, groupMessage: GroupMessage) {
         logger.debug("receive version command!")
         val str = """
             |BotIzumi-NG Project
-            |Version: 0.0.1
+            |Version: 0.1.0
+            |
+            |ChangeLog:
+            |v0.1.0
+            |- 添加涩图功能
             |
             |Github: https://github.com/lightless233/BotIzumiNg
             |If you find any bug, please report at: https://github.com/lightless233/BotIzumiNg/issues

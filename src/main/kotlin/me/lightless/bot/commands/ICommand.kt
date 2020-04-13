@@ -8,7 +8,7 @@ interface ICommand {
     val logger: Logger
     val command: List<String>
 
-    suspend fun handler(groupMessage: GroupMessage)
+    suspend fun handler(cmd: String, groupMessage: GroupMessage)
 
     fun checkRole(qq: Long): Boolean
 

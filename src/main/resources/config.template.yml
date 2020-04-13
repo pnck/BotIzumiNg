@@ -3,3 +3,9 @@ qqPassword: 123456
 allowedGroups:
   - 2222
   - 1111
+
+adminQQ:
+  - 2222
+  - 1111
+
+colorKey: "xxxx"

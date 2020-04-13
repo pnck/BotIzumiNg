@@ -7,4 +7,5 @@ class Config {
     lateinit var qqPassword: String
     lateinit var allowedGroups: List<Long>
     lateinit var adminQQ: List<Long>
+    lateinit var colorKey: String
 }
