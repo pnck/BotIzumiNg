@@ -18,24 +18,35 @@ import java.net.URL
 
 class ColorPicCmd : ICommand {
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
-    override val command: List<String> = listOf("/冲", "/涩图", "/还没好", "/不够涩")
+    override val command: List<String> = listOf("/冲", "/涩图", "/还没好", "/不够涩", "/还有吗")
     private val r18Command = listOf("/不够涩")
 
     private val api = "https://api.lolicon.app/setu/?size1200=true"
+    private val apiKey = BotContext.botConfig!!.colorKey
 
     override suspend fun handler(cmd: String, groupMessage: GroupMessage) {
 
         logger.debug("ColorPicCmd called.")
 
+        // 解析出search keyword
+        val message = groupMessage.message.contentToString()
+        val msgArray = message.split("""\s+""".toRegex())
+        val keyword = msgArray.getOrNull(1)
+
+        // 判断 r18 标志位
         val r18: Int = when {
             r18Command.contains(cmd) -> 1
             else -> 0
         }
 
-        val key = BotContext.botConfig!!.colorKey
-
+        // 设置代理，拼接URL
         val socksProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
-        val url = "${api}&r18=${r18}&apikey=${key}"
+        var url = "${api}&r18=${r18}&apikey=${apiKey}"
+        if (keyword != null) {
+            url = "$url&keyword=$keyword"
+        }
+        logger.debug("Final URL: $url")
+
         val response = withContext(Dispatchers.IO) {
             val connection = URL(url).openConnection(socksProxy)
             connection.getInputStream().reader().readText()
@@ -73,7 +84,7 @@ class ColorPicCmd : ICommand {
 
             val connection = URL(colorUrl).openConnection(socksProxy)
             connection.addRequestProperty("Referer", "https://www.pixiv.net/")
-//            connection.addRequestProperty("User-Agent", "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36")
+            // 别问为啥要设置成 curl 的 UA，他就是可以用
             connection.addRequestProperty("User-Agent", "curl/7.67.0")
             groupMessage.group.sendImage(connection.getInputStream())
             groupMessage.group.sendMessage(buildMessageChain {
