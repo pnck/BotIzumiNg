@@ -21,7 +21,7 @@ class VersionCmd() : ICommand {
         logger.debug("receive version command!")
         val str = """
             |BotIzumi-NG Project
-            |Version: 0.1.0
+            |Version: 1.0.1-SNAPSHOT
             |
             |ChangeLog:
             |v0.1.0

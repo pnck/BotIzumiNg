@@ -73,7 +73,7 @@ class CommandHandler {
             }
         }
 
-        logger.info("clazzArray: $clazzArray")
+        logger.debug("clazzArray: $clazzArray")
 
         clazzArray.forEach {
             commandsImpls.add(Class.forName(it).kotlin.createInstance() as ICommand)

@@ -63,11 +63,18 @@ class ColorPicCmd : ICommand {
                 })
                 return
             }
+            obj["code"] == 404 -> {
+                groupMessage.group.sendMessage(buildMessageChain {
+                    add("没有找到你要的涩图呢~")
+                })
+                return
+            }
             obj["code"] != 0 -> {
                 // 出错了
                 groupMessage.group.sendMessage(buildMessageChain {
                     add("API 出问题了，快点修复吧~")
                 })
+                return
             }
         }
 
@@ -76,6 +83,8 @@ class ColorPicCmd : ICommand {
         val author = data["author"] as String
         val pid = data["pid"] as Int
         val title = data["title"] as String
+        val tags = data["tags"] as List<*>
+        val readableTags: String = tags.joinToString()
 
         logger.debug("colorUrl: $colorUrl, title: $title, author: $author, pid: $pid")
 
@@ -89,8 +98,8 @@ class ColorPicCmd : ICommand {
             groupMessage.group.sendImage(connection.getInputStream())
             groupMessage.group.sendMessage(buildMessageChain {
                 add(
-                    "Author: $author\nTitle: $title\npixiv id: $pid\n" +
-                            "当前展示缩略图，喜欢该图请去P站支持原作者哦~"
+                    "Author: $author\nTitle: $title\nPixivId: $pid\nTags: $readableTags\n" +
+                            "\n当前展示缩略图，喜欢该图请去P站支持原作者哦~"
                 )
             })
         }
