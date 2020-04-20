@@ -24,7 +24,7 @@ class VersionCmd() : ICommand {
             |Version: 1.0.1-SNAPSHOT
             |
             |ChangeLog:
-            |v0.1.0
+            |v1.0.1-SNAPSHOT
             |- 添加涩图功能
             |
             |Github: https://github.com/lightless233/BotIzumiNg
