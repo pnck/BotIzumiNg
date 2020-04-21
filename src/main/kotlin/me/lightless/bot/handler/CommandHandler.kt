@@ -31,6 +31,7 @@ class CommandHandler {
         )
     }
 
+    // TODO: 改成 utils 里封装好的方法
     private fun loadCommands(): Int {
         var cnt = 0
         val clazzArray: MutableList<String> = arrayListOf()
