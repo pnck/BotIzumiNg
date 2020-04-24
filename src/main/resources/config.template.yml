@@ -9,3 +9,5 @@ adminQQ:
   - 1111
 
 colorKey: "xxxx"
+
+dbName: "bot.sqlite"

@@ -26,6 +26,11 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.1")
     implementation("org.yaml:snakeyaml:1.26")
     implementation("com.beust:klaxon:5.0.1")
+    implementation("org.jetbrains.exposed:exposed-core:0.23.1")
+    implementation("org.jetbrains.exposed:exposed-dao:0.23.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
+    implementation("org.xerial:sqlite-jdbc:3.21.0.1")
+    implementation("org.jetbrains.exposed", "exposed-jodatime", "0.23.1")
 }
 
 configure<JavaPluginConvention> {

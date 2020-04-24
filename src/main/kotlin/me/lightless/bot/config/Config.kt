@@ -8,4 +8,8 @@ class Config {
     lateinit var allowedGroups: List<Long>
     lateinit var adminQQ: List<Long>
     lateinit var colorKey: String
+
+    // db config
+    // dbName: ./db.sqlite
+    lateinit var dbName: String
 }

@@ -1,15 +1,14 @@
 package me.lightless.bot
 
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.lightless.bot.config.Config
 import me.lightless.bot.config.ConfigParser
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.BotOfflineEvent
-import net.mamoe.mirai.event.subscribe
 import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.event.subscribeGroupMessages
+import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 
 private const val TAG = "[MainApp]"
@@ -34,6 +33,10 @@ fun main(): Unit = runBlocking {
         return@runBlocking
     }
     logger.info("$TAG success load config file...")
+
+    // 连接数据库
+    val dbName = BotContext.botConfig!!.dbName
+    Database.connect("jdbc:sqlite:$dbName", "org.sqlite.JDBC")
 
     // 启动 Bot 实例
     val bot = Bot(
