@@ -16,6 +16,7 @@ private const val TAG = "[MainApp]"
 class BotContext {
     companion object {
         var botConfig: Config? = null
+        var bot: Bot? = null
     }
 }
 
@@ -44,18 +45,27 @@ fun main(): Unit = runBlocking {
         BotContext.botConfig!!.qqPassword
     ).alsoLogin()
 
-    //
-    val dispatcher = Dispatcher()
+    // 把 bot instance 存起来
+    BotContext.bot = bot
 
+    // 开启消息分发
+    val dispatcher = Dispatcher()
     bot.subscribeGroupMessages {
         always {
             dispatcher.onGroupMessage(this)
         }
     }
-
     bot.subscribeAlways<BotOfflineEvent.Force> {
         bot.login()
     }
 
+    // 初始化 timer
+    // debug 用，先直接初始化
+//    logger.debug("starting init timer...")
+//    val drinkTimer = DrinkTimer(bot)
+//    drinkTimer.process()
+//    logger.info("timers init done.")
+
+    // 防止 bot 过快退出
     bot.join()
 }
