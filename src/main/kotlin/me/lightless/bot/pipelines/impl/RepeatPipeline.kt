@@ -1,14 +1,12 @@
 package me.lightless.bot.pipelines.impl
 
 import me.lightless.bot.pipelines.IPipeline
-import net.mamoe.mirai.contact.mute
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.buildMessageChain
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.random.Random
-import kotlin.time.Duration
 
 class RepeatPipeline : IPipeline {
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -32,6 +30,7 @@ class RepeatPipeline : IPipeline {
         var map = messageMap[groupNumber]
         if (map == null) {
             map = mutableMapOf("msg" to "", "cnt" to 1)
+            messageMap[groupNumber] = map
         }
 
         // 累加重复消息的次数

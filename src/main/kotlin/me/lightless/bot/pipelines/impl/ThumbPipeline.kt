@@ -54,7 +54,8 @@ class ThumbPipeline : IPipeline {
                 add("\n嘤嘤嘤，发现大拇指了呢，呐，大拇指什么的是不可以的呢！")
             })
 
-            // TODO: 禁言
+            // 禁言
+            groupMessage.sender.mute(thumbCnt * 2 * 60)
         }
 
     }
