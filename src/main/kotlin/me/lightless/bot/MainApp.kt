@@ -15,8 +15,14 @@ private const val TAG = "[MainApp]"
 
 class BotContext {
     companion object {
+        // config
         var botConfig: Config? = null
+
+        // bot 实例
         var bot: Bot? = null
+
+        // 当前的工作路径
+        var cwd: String? = null
     }
 }
 
@@ -24,6 +30,11 @@ class BotContext {
 fun main(): Unit = runBlocking {
     val logger = LoggerFactory.getLogger("main")
     logger.info("$TAG Bot Izumi start start.")
+
+    // 获取当前的工作路径
+    val cwd: String = System.getProperty("user.dir")
+    BotContext.cwd = cwd
+    logger.info("Get cwd: $cwd")
 
     // 加载配置文件
     logger.info("$TAG loading config file...")
