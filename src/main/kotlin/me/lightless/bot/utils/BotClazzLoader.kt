@@ -8,11 +8,11 @@ object BotClazzLoader {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun load(commandPackageName: String): List<String> {
+    fun load(packageName: String): List<String> {
 
         val clazzList = mutableListOf<String>()
         val jarFile = File(javaClass.protectionDomain.codeSource.location.path)
-        val commandPackagePath = commandPackageName.replace(".", "/")
+        val commandPackagePath = packageName.replace(".", "/")
 
         if (jarFile.isFile) {
             logger.debug("Running with JAR file")
@@ -46,7 +46,7 @@ object BotClazzLoader {
             files!!.forEach { f ->
                 val filename = f.name
                 if (filename.endsWith(".class") && !filename.contains("$")) {
-                    val className = commandPackageName + "." + filename.replace(".class", "")
+                    val className = packageName + "." + filename.replace(".class", "")
                     clazzList.add(className)
                 }
             }

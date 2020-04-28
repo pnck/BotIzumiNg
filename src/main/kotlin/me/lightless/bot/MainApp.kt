@@ -3,6 +3,7 @@ package me.lightless.bot
 import kotlinx.coroutines.runBlocking
 import me.lightless.bot.config.Config
 import me.lightless.bot.config.ConfigParser
+import me.lightless.bot.timers.TimerLoader
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.BotOfflineEvent
@@ -52,12 +53,11 @@ fun main(): Unit = runBlocking {
     Database.connect("jdbc:sqlite:$dbName", "org.sqlite.JDBC")
 
     // 启动 Bot 实例
+    // 把 bot instance 存起来
     val bot = Bot(
         BotContext.botConfig!!.qqNumber,
         BotContext.botConfig!!.qqPassword
     ).alsoLogin()
-
-    // 把 bot instance 存起来
     BotContext.bot = bot
 
     // 开启消息分发
@@ -72,11 +72,9 @@ fun main(): Unit = runBlocking {
     }
 
     // 初始化 timer
-    // debug 用，先直接初始化
-//    logger.debug("starting init timer...")
-//    val drinkTimer = DrinkTimer(bot)
-//    drinkTimer.process()
-//    logger.info("timers init done.")
+    logger.debug("starting init timer...")
+    TimerLoader.loadAndStartTimer()
+    logger.info("timers init done.")
 
     // 防止 bot 过快退出
     bot.join()
