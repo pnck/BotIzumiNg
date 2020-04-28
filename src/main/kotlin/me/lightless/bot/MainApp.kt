@@ -10,6 +10,7 @@ import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.event.subscribeGroupMessages
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 private const val TAG = "[MainApp]"
 
@@ -37,12 +38,12 @@ fun main(): Unit = runBlocking {
     logger.info("Get cwd: $cwd")
 
     // 加载配置文件
-    logger.info("$TAG loading config file...")
-    val parser = ConfigParser("config.yml")
-    BotContext.botConfig = parser.parse()
+    logger.debug("$TAG loading config file...")
+    val parser = ConfigParser("izumi-config.yml")
+    BotContext.botConfig = parser.parseExternalConfig()
     if (BotContext.botConfig == null) {
         logger.error("Can't load config file, exit...")
-        return@runBlocking
+        exitProcess(-1)
     }
     logger.info("$TAG success load config file...")
 

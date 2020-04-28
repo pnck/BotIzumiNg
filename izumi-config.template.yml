@@ -1,0 +1,7 @@
+!!me.lightless.bot.config.Config
+adminQQ: [10000]
+allowedGroups: [1111, 2222]
+colorKey: your_color_key
+dbName: izumi-bot-db.sqlite
+qqNumber: 10000
+qqPassword: your_secret_password

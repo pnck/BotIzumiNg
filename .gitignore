@@ -129,3 +129,4 @@ gradle-app.setting
 .idea/
 logs/
 /src/main/resources/config.yml
+izumi-config.yml
