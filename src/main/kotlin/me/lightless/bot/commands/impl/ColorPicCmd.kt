@@ -132,7 +132,8 @@ class ColorPicCmd : ICommand {
             groupMessage.group.sendMessage(buildMessageChain {
                 add(
                     "Author: $author\nTitle: $title\nPixivId: $pid\nTags: $readableTags\n" +
-                            "\n当前展示缩略图，喜欢该图请去P站支持原作者哦~"
+                            "\n当前展示缩略图，喜欢该图请去P站支持原作者哦~\n" +
+                            "原图链接：$colorUrl"
                 )
             })
 
