@@ -16,7 +16,7 @@ object ColorPicUtil {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun doMosaic(image: BufferedImage): BufferedImage {
-        val mosaicSize = 20
+        val mosaicSize = 40
 //        val image = ImageIO.read(pis)
 
         val width = image.width
