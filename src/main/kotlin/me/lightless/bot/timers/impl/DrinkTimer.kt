@@ -32,26 +32,26 @@ class DrinkTimer : ITimer {
 
         val weekend = listOf(DateTimeConstants.SUNDAY, DateTimeConstants.SATURDAY)
 
-        val task = object: TimerTask() {
-            override fun run() {
-
-                val datetime = DateTime()
-                // 周末不提醒
-                if (datetime.dayOfWeek in weekend) {
-                    Thread.sleep(1000 * 3600)
-                    return
-                }
-
-                val h = datetime.hourOfDay
-                val m = datetime.minuteOfHour
-                logger.debug("h: $h, m: $m")
-
-
-
-
-            }
-        }
-        Timer().schedule(task, 0, period)
+//        val task = object: TimerTask() {
+//            override fun run() {
+//
+//                val datetime = DateTime()
+//                // 周末不提醒
+//                if (datetime.dayOfWeek in weekend) {
+//                    Thread.sleep(1000 * 3600)
+//                    return
+//                }
+//
+//                val h = datetime.hourOfDay
+//                val m = datetime.minuteOfHour
+//                logger.debug("h: $h, m: $m")
+//
+//
+//
+//
+//            }
+//        }
+//        Timer().schedule(task, 0, period)
 
 //        Timer().schedule(0, period) {
 //

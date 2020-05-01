@@ -7,14 +7,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.lightless.bot.BotContext
 import me.lightless.bot.commands.ICommand
+import me.lightless.bot.utils.ColorPicUtil
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.sendImage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.InputStream
+import java.io.RandomAccessFile
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.URL
+import javax.imageio.ImageIO
 
 class ColorPicCmd : ICommand {
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -95,13 +101,42 @@ class ColorPicCmd : ICommand {
             connection.addRequestProperty("Referer", "https://www.pixiv.net/")
             // 别问为啥要设置成 curl 的 UA，他就是可以用
             connection.addRequestProperty("User-Agent", "curl/7.67.0")
-            groupMessage.group.sendImage(connection.getInputStream())
+            connection.connectTimeout = 12 * 1000
+            connection.readTimeout = 12 * 1000
+            val picInputStream: InputStream
+            try {
+                picInputStream = connection.getInputStream()
+            } catch (e: FileNotFoundException) {
+                logger.error("File not found when getting color pic...")
+                groupMessage.group.sendMessage(buildMessageChain {
+                    add("404")
+                })
+                return@withContext
+            }
+            val pic = ImageIO.read(picInputStream)
+            picInputStream.close()
+
+            val mosaic = ColorPicUtil.doMosaic(pic)
+            val frames = listOf(mosaic, pic)
+            val delay = listOf("200", "200")
+            val finalPic = ColorPicUtil.doGif(frames, delay)
+
+            val tempFile = File.createTempFile("izumi-", ".gif")
+            logger.debug("temp file: ${tempFile.absolutePath}")
+            tempFile.writeBytes(finalPic.toByteArray())
+
+//            val temp = ImageIO.read(ByteArrayInputStream(finalPic.toByteArray()))
+//            val x = temp.toExternalImage("GIF")
+//            x.sendTo(groupMessage.group)
+            groupMessage.group.sendImage(tempFile)
             groupMessage.group.sendMessage(buildMessageChain {
                 add(
                     "Author: $author\nTitle: $title\nPixivId: $pid\nTags: $readableTags\n" +
                             "\n当前展示缩略图，喜欢该图请去P站支持原作者哦~"
                 )
             })
+
+            tempFile.delete()
         }
     }
 

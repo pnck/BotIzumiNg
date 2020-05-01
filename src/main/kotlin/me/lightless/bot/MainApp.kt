@@ -9,6 +9,7 @@ import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.BotOfflineEvent
 import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.event.subscribeGroupMessages
+import net.mamoe.mirai.join
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess

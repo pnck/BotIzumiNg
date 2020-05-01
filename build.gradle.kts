@@ -17,7 +17,7 @@ dependencies {
 //    testCompile("junit", "junit", "4.12")
 //    implementation("org.slf4j:slf4j-simple:1.7.30")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("net.mamoe:mirai-core-qqandroid-jvm:0.35.0")
+    implementation("net.mamoe:mirai-core-qqandroid:0.40.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.microutils:kotlin-logging:1.7.9")
     implementation("org.slf4j:slf4j-api:1.7.30")
