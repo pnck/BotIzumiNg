@@ -5,3 +5,4 @@ colorKey: your_color_key
 dbName: izumi-bot-db.sqlite
 qqNumber: 10000
 qqPassword: your_secret_password
+mosaicSize: 40

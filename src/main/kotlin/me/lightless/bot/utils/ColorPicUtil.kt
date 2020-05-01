@@ -1,5 +1,6 @@
 package me.lightless.bot.utils
 
+import me.lightless.bot.BotContext
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -16,7 +17,7 @@ object ColorPicUtil {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun doMosaic(image: BufferedImage): BufferedImage {
-        val mosaicSize = 40
+        val mosaicSize = BotContext.botConfig!!.mosaicSize
 //        val image = ImageIO.read(pis)
 
         val width = image.width

@@ -12,4 +12,7 @@ class Config {
     // db config
     // dbName: ./db.sqlite
     lateinit var dbName: String
+
+    // 马赛克大小
+    var mosaicSize: Int = 40
 }

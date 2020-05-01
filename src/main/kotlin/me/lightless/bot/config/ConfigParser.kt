@@ -62,6 +62,7 @@ class ConfigParser(private val filename: String) {
         config.allowedGroups = listOf(1111, 2222)
         config.colorKey = "your_color_key"
         config.dbName = "izumi-bot-db.sqlite"
+        config.mosaicSize = 40
 
         return config
     }
