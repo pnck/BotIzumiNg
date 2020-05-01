@@ -10,7 +10,6 @@ import javax.imageio.IIOImage
 import javax.imageio.ImageIO
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
-import javax.imageio.stream.ImageOutputStream
 
 object ColorPicUtil {
 
@@ -60,14 +59,14 @@ object ColorPicUtil {
                 var centerY = y
 
                 centerX += if (mWidth % 2 == 0) {
-                    mWidth / 2;
+                    mWidth / 2
                 } else {
-                    (mWidth - 1) / 2;
+                    (mWidth - 1) / 2
                 }
                 centerY += if (mHeight % 2 == 0) {
-                    mHeight / 2;
+                    mHeight / 2
                 } else {
-                    (mHeight - 1) / 2;
+                    (mHeight - 1) / 2
                 }
 
 //                logger.debug("centerX: $centerX, centerY: $centerY")
