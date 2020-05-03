@@ -21,7 +21,16 @@ class VersionCmd() : ICommand {
         logger.debug("receive version command!")
         val str = """
             |BotIzumi-NG Project
-            |Version: 1.0.1-SNAPSHOT
+            |Version: 1.0.3-SNAPSHOT
+            |
+            |ChangeLog
+            |v1.0.3-SNAPSHOT
+            |- PUBG查询功能
+            |
+            |
+            |ChangeLog:
+            |v1.0.2-SNAPSHOT
+            |- 涩图添加 anti-NSFW功能
             |
             |ChangeLog:
             |v1.0.1-SNAPSHOT
