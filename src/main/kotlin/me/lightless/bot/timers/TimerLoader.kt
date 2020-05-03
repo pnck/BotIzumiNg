@@ -1,5 +1,6 @@
 package me.lightless.bot.timers
 
+import kotlinx.coroutines.coroutineScope
 import me.lightless.bot.utils.BotClazzLoader
 import org.slf4j.LoggerFactory
 import kotlin.reflect.full.createInstance
@@ -24,9 +25,11 @@ object TimerLoader {
         }
         logger.debug("timers count: $successCnt")
 
-        // 启动所有的timer
+        // 启动所有的timer，每一个timer在一个单独的协程中启动
         timerImpls.forEach {
-            it.process()
+            coroutineScope {
+                it.process()
+            }
         }
     }
 }
