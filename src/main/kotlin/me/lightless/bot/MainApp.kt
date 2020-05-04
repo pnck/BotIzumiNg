@@ -3,6 +3,8 @@ package me.lightless.bot
 import kotlinx.coroutines.runBlocking
 import me.lightless.bot.config.Config
 import me.lightless.bot.config.ConfigParser
+import me.lightless.bot.dao.PubgMatchesModel
+import me.lightless.bot.dao.PubgPlayerModel
 import me.lightless.bot.timers.TimerLoader
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
@@ -11,11 +13,18 @@ import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.join
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
+import java.sql.Connection
 import kotlin.system.exitProcess
 
 private const val TAG = "[MainApp]"
 
+// TODO("把这个类单独放到一个文件中去")
 class BotContext {
     companion object {
         // config
@@ -30,6 +39,7 @@ class BotContext {
 }
 
 
+// TODO(“简化main函数，把初始化工作分拆出去”)
 fun main(): Unit = runBlocking {
     val logger = LoggerFactory.getLogger("main")
     logger.info("$TAG Bot Izumi start start.")
@@ -52,6 +62,12 @@ fun main(): Unit = runBlocking {
     // 连接数据库
     val dbName = BotContext.botConfig!!.dbName
     Database.connect("jdbc:sqlite:$dbName", "org.sqlite.JDBC")
+    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+    // 初始化数据库表
+    transaction {
+//        addLogger(StdOutSqlLogger)
+        SchemaUtils.create(PubgPlayerModel, PubgMatchesModel)
+    }
 
     // 启动 Bot 实例
     // 把 bot instance 存起来

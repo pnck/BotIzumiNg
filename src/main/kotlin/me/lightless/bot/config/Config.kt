@@ -15,4 +15,7 @@ class Config {
 
     // 马赛克大小
     var mosaicSize: Int = 40
+
+    // pubg key
+    lateinit var pubgKey: String
 }

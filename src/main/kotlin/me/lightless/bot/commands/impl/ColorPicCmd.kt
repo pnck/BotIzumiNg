@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.io.RandomAccessFile
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.URL

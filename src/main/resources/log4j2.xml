@@ -19,5 +19,10 @@
             <appenderRef ref="stdout" />
             <!--            <appenderRef ref="file"/>-->
         </root>
+        <logger name="Exposed" level="warn" additivity="false">
+            <appender-ref ref="stdout"/>
+        </logger>
     </loggers>
+
+
 </configuration>

@@ -63,6 +63,7 @@ class ConfigParser(private val filename: String) {
         config.colorKey = "your_color_key"
         config.dbName = "izumi-bot-db.sqlite"
         config.mosaicSize = 40
+        config.pubgKey = "your_pubg_key_here!!!!"
 
         return config
     }
