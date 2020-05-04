@@ -5,6 +5,7 @@ import me.lightless.bot.config.Config
 import me.lightless.bot.config.ConfigParser
 import me.lightless.bot.dao.PubgMatchesModel
 import me.lightless.bot.dao.PubgPlayerModel
+import me.lightless.bot.dao.PubgSeasonDetailModel
 import me.lightless.bot.timers.TimerLoader
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
@@ -66,7 +67,7 @@ fun main(): Unit = runBlocking {
     // 初始化数据库表
     transaction {
 //        addLogger(StdOutSqlLogger)
-        SchemaUtils.create(PubgPlayerModel, PubgMatchesModel)
+        SchemaUtils.create(PubgPlayerModel, PubgMatchesModel, PubgSeasonDetailModel)
     }
 
     // 启动 Bot 实例
