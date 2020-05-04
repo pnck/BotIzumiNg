@@ -18,6 +18,11 @@ class PubgUpdateTimer : ITimer {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    suspend fun updatePlayerSeasonInfo(jsonResponse: JsonObject) {
+        val data = jsonResponse["data"] as JsonArray<*>
+
+    }
+
     override suspend fun process() {
         /**
          * 每隔一段时间，更新一次所有的player信息
@@ -28,6 +33,8 @@ class PubgUpdateTimer : ITimer {
         while (true) {
             val allPlayers = PubgService.getAllPlayers()
             val names = transaction { allPlayers.joinToString(separator = ",") { it.name } }
+            // FIXME 这个API一次只能查10个用户，以后要改掉，目前没有那么多人
+            // CALL_1
             val response = PubgApi.getPlayerInfoByName(names)
             val dataSet = response?.get("data") as JsonArray<*>
             logger.debug("dataSet: $dataSet")
@@ -58,6 +65,11 @@ class PubgUpdateTimer : ITimer {
                 }
 
             }
+            // TODO("UPDATE SEASON PLAYER INFO")
+            val ids = transaction { allPlayers.joinToString(separator = ",") { it.playerId } }
+            val seasonResponse = PubgApi.getPlayerCurrentSeasonInfo(ids)
+
+
 
             // TODO("UPDATE MATCHES DETAILS INFO")
 
