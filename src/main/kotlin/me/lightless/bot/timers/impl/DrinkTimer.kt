@@ -29,7 +29,7 @@ class DrinkTimer : ITimer {
             val datetime = DateTime()
             val h = datetime.hourOfDay
             val m = datetime.minuteOfHour
-            logger.debug("h: $h, m: $m")
+//            logger.debug("h: $h, m: $m")
 
             // debug code
 //            if (h == 13 && m == 3) {

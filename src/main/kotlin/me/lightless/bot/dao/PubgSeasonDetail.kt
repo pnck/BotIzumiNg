@@ -15,8 +15,8 @@ object PubgSeasonDetailModel : LongIdTable("pubg_season_detail") {
     val assists = integer("assists")
     val dbnos = integer("dbnos")
     val kills = integer("kills")
-    val damageDealt = float("damage_dealt")   // 伤害总量
-    val longestKill = float("longest_kill")   // 最远击杀
+    val damageDealt = double("damage_dealt")   // 伤害总量
+    val longestKill = double("longest_kill")   // 最远击杀
     val headshotKills = integer("headshot_kills")   // 爆头击杀
     val maxKillStreaks = integer("max_kill_streaks")    // 最大连杀
     val roundMostKills = integer("round_most_kills")    // 一局中的最大击杀次数
@@ -29,15 +29,18 @@ object PubgSeasonDetailModel : LongIdTable("pubg_season_detail") {
     val suicides = integer("suicides")  // 自杀次数
     val vehicleDestroys = integer("vehicle_destroy")    // 破坏车辆次数
 
-    val rideDistance = float("ride_distance")   // 开车距离
-    val swimDistance = float("swim_distance")   // 游泳距离
-    val walkDistance = float("walk_distance")   // 徒步次数
+    val rideDistance = double("ride_distance")   // 开车距离
+    val swimDistance = double("swim_distance")   // 游泳距离
+    val walkDistance = double("walk_distance")   // 徒步次数
 
     val wins = integer("wins")  // 吃鸡次数
     val top10s = integer("top10s")  // 前10次数
 
     val weeklyKills = integer("weekly_kills")   // 本周击杀
     val weeklyWins = integer("weekly_wins")     // 本周吃鸡
+
+    val mostSurvivalTime = double("most_survival_time") //最大生存时间
+    val timeSurvived = double("time_survived")  //总共生存时间
 
     val createdTime = datetime("created_time").default(DateTime.now())
     val updatedTime = datetime("updated_time").default(DateTime.now())
@@ -76,6 +79,9 @@ class PubgSeasonDetailDAO(id: EntityID<Long>) : LongEntity(id) {
 
     var weeklyKills by PubgSeasonDetailModel.weeklyKills
     var weeklyWins by PubgSeasonDetailModel.weeklyWins
+
+    var mostSurvivalTime by PubgSeasonDetailModel.mostSurvivalTime
+    var timeSurvived by PubgSeasonDetailModel.timeSurvived
 
     var createdTime by PubgSeasonDetailModel.createdTime
     var updatedTime by PubgSeasonDetailModel.updatedTime

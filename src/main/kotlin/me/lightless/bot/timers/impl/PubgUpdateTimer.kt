@@ -8,8 +8,9 @@ import me.lightless.bot.timers.ITimer
 import me.lightless.bot.utils.PubgApi
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 
+
+@Suppress("unused")
 class PubgUpdateTimer : ITimer {
     override val name: String
         get() = "PubgPlayerUpdater"
@@ -18,9 +19,50 @@ class PubgUpdateTimer : ITimer {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun updatePlayerSeasonInfo(jsonResponse: JsonObject) {
+    private fun updatePlayerSeasonInfo(jsonResponse: JsonObject) {
         val data = jsonResponse["data"] as JsonArray<*>
+        data.forEach {
+            val item = it as JsonObject
 
+            // 获取这个数据关联的player和season
+            val playerId =
+                (((item["relationships"] as JsonObject)["player"] as JsonObject)["data"] as JsonObject)["id"] as String
+            val season =
+                (((item["relationships"] as JsonObject)["season"] as JsonObject)["data"] as JsonObject)["id"] as String
+
+            // 获取数据信息
+            val seasonData = ((item["attributes"] as JsonObject)["gameModeStats"] as JsonObject)["squad"] as JsonObject
+
+            // 更新玩家的数据
+            PubgService.updatePlayerSeasonInfo(season, playerId, seasonData.toMap())
+        }
+    }
+
+    private fun updateMatchList(jsonResponse: JsonObject) {
+        val data = jsonResponse["data"] as JsonArray<*>
+        data.forEach {
+            val item = it as JsonObject
+            val playerId =
+                (((item["relationships"] as JsonObject)["player"] as JsonObject)["data"] as JsonObject)["id"] as String
+
+            val matchList =
+                ((item["relationships"] as JsonObject)["matchesSquad"] as JsonObject)["data"] as JsonArray<*>
+
+            for (match in matchList) {
+                val m = match as JsonObject
+                val matchType = m["type"] as String
+                val matchId = m["id"] as String
+
+                // 检查 matchId 是否存在，如果不存在就创建，如果存在则更新关联的player
+                val matchDao = PubgService.getMatchByMid(matchId)
+                if (matchDao == null) {
+                    PubgService.saveMatchInfo(matchType, matchId, playerId)
+                } else {
+                    PubgService.updateMatchPlayerInfo(matchId, playerId)
+                }
+            }
+
+        }
     }
 
     override suspend fun process() {
@@ -32,47 +74,15 @@ class PubgUpdateTimer : ITimer {
 
         while (true) {
             val allPlayers = PubgService.getAllPlayers()
-            val names = transaction { allPlayers.joinToString(separator = ",") { it.name } }
-            // FIXME 这个API一次只能查10个用户，以后要改掉，目前没有那么多人
-            // CALL_1
-            val response = PubgApi.getPlayerInfoByName(names)
-            val dataSet = response?.get("data") as JsonArray<*>
-            logger.debug("dataSet: $dataSet")
+            val playerIds = transaction { allPlayers.joinToString(separator = ",") { it.playerId } }
 
-            dataSet.forEach {
-                val item = it as JsonObject
-                val id: String = item["id"] as String
-                val matches = (item["relationships"] as JsonObject)["matches"] as JsonObject
-                val matchData = matches["data"] as JsonArray<*>
-
-                matchData.forEach { mit ->
-                    val matchItem = mit as JsonObject
-                    val matchType = matchItem["type"] as String
-                    val matchId = matchItem["id"] as String
-
-                    // 检查 match id 是否存在，如果不存在，就新建一条
-                    // 如果存在，检查 player 字段中，是否有当前用户，如果没有就添加进去
-                    val matchDao = PubgService.getMatchByMid(matchId)
-                    if (matchDao == null) {
-                        PubgService.saveMatchInfo(matchType, matchId, id)
-                    } else {
-                        val ids = matchDao.playerIds
-                        if (!ids.contains(id)) {
-                            PubgService.updateMatchPlayerInfo(matchId, id)
-                        }
-                    }
-
-                }
-
-            }
-            // TODO("UPDATE SEASON PLAYER INFO")
-            val ids = transaction { allPlayers.joinToString(separator = ",") { it.playerId } }
-            val seasonResponse = PubgApi.getPlayerCurrentSeasonInfo(ids)
-
-
+            val seasonResponse = PubgApi.getPlayerCurrentSeasonInfo(playerIds)
+            seasonResponse?.let {
+                updatePlayerSeasonInfo(it)
+                updateMatchList(it)
+            } ?: logger.error("seasonResponse is null!")
 
             // TODO("UPDATE MATCHES DETAILS INFO")
-
             delay(period)
         }
 
