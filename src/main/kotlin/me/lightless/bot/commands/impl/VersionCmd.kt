@@ -27,12 +27,9 @@ class VersionCmd() : ICommand {
             |v1.0.3-SNAPSHOT
             |- PUBG查询功能
             |
-            |
-            |ChangeLog:
             |v1.0.2-SNAPSHOT
             |- 涩图添加 anti-NSFW功能
             |
-            |ChangeLog:
             |v1.0.1-SNAPSHOT
             |- 添加涩图功能
             |
