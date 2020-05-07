@@ -9,13 +9,13 @@ import me.lightless.bot.BotContext
 import me.lightless.bot.commands.ICommand
 import me.lightless.bot.utils.ColorPicUtil
 import net.mamoe.mirai.message.GroupMessage
+import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.sendImage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.InputStream
+import java.awt.image.BufferedImage
+import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.URL
@@ -23,11 +23,38 @@ import javax.imageio.ImageIO
 
 class ColorPicCmd : ICommand {
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
-    override val command: List<String> = listOf("/冲", "/涩图", "/还没好", "/不够涩", "/还有吗")
-    private val r18Command = listOf("/不够涩")
+    override val command: List<String> = listOf("/冲", "/涩图", "/还没好", "/不够涩", "/还有吗", "/r18")
+    private val r18Command = listOf("/r18")
+    private val spc = listOf("/不够涩", "/还没好")
 
     private val api = "https://api.lolicon.app/setu/?size1200=true"
     private val apiKey = BotContext.botConfig!!.colorKey
+
+    private var lastPicUrl: String? = null
+    private var r18Switch = false
+
+    private val socksProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
+
+    private suspend fun getImage(url: String): BufferedImage? {
+        return withContext(Dispatchers.IO) {
+            val connection: HttpURLConnection = URL(url).openConnection(socksProxy) as HttpURLConnection
+            connection.addRequestProperty("Referer", "https://www.pixiv.net/")
+            // 别问为啥要设置成 curl 的 UA，他就是可以用
+            connection.addRequestProperty("User-Agent", "curl/7.67.0")
+            connection.connectTimeout = 12 * 1000
+            connection.readTimeout = 12 * 1000
+
+            val result: BufferedImage?
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                return@withContext null
+            } else {
+                result = ImageIO.read(connection.inputStream)
+                connection.inputStream.close()
+                connection.disconnect()
+                return@withContext result
+            }
+        }
+    }
 
     override suspend fun handler(cmd: String, groupMessage: GroupMessage) {
 
@@ -39,14 +66,53 @@ class ColorPicCmd : ICommand {
         val keyword = msgArray.getOrNull(1)
 
         // 判断 r18 标志位
-        val r18: Int = when {
-            r18Command.contains(cmd) -> 1
-            else -> 0
+        if (cmd in r18Command) {
+            this.r18Switch = when (keyword) {
+                "enable" -> true
+                "disable" -> false
+                "status" -> {
+                    groupMessage.group.sendMessage(buildMessageChain {
+                        add(At(groupMessage.sender))
+                        add("\n当前R18状态：${r18Switch}")
+                    })
+                    return
+                }
+                else -> false
+            }
+            groupMessage.group.sendMessage(buildMessageChain {
+                add(At(groupMessage.sender))
+                add("\n操作成功")
+            })
+            return
         }
 
-        // 设置代理，拼接URL
-        val socksProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", 9050))
-        var url = "${api}&r18=${r18}&apikey=${apiKey}"
+        if (cmd in spc) {
+            if (lastPicUrl == null) {
+                groupMessage.group.sendMessage(buildMessageChain {
+                    add(At(groupMessage.sender))
+                    add("\n嗯？你想看什么？")
+                })
+            } else {
+                val image = getImage(lastPicUrl!!)
+                if (image != null) {
+                    groupMessage.group.sendImage(image)
+                } else {
+                    groupMessage.group.sendMessage(buildMessageChain {
+                        add(At(groupMessage.sender))
+                        add("\n出错了...换一张涩图吧!")
+                    })
+                }
+            }
+            return
+        }
+
+        // 普通命令
+        var url = "${api}&apikey=${apiKey}"
+        url = if (this.r18Switch) {
+            "${url}&r18=1"
+        } else {
+            "${url}&r18=0"
+        }
         if (keyword != null) {
             url = "$url&keyword=$keyword"
         }
@@ -92,42 +158,11 @@ class ColorPicCmd : ICommand {
         val readableTags: String = tags.joinToString()
 
         logger.debug("colorUrl: $colorUrl, title: $title, author: $author, pid: $pid")
-
-        // 发送
-        withContext(Dispatchers.IO) {
-
-            val connection = URL(colorUrl).openConnection(socksProxy)
-            connection.addRequestProperty("Referer", "https://www.pixiv.net/")
-            // 别问为啥要设置成 curl 的 UA，他就是可以用
-            connection.addRequestProperty("User-Agent", "curl/7.67.0")
-            connection.connectTimeout = 12 * 1000
-            connection.readTimeout = 12 * 1000
-            val picInputStream: InputStream
-            try {
-                picInputStream = connection.getInputStream()
-            } catch (e: FileNotFoundException) {
-                logger.error("File not found when getting color pic...")
-                groupMessage.group.sendMessage(buildMessageChain {
-                    add("404")
-                })
-                return@withContext
-            }
-            val pic = ImageIO.read(picInputStream)
-            picInputStream.close()
-
-            val mosaic = ColorPicUtil.doMosaic(pic)
-            val frames = listOf(mosaic, pic)
-            val delay = listOf("200", "200")
-            val finalPic = ColorPicUtil.doGif(frames, delay)
-
-            val tempFile = File.createTempFile("izumi-", ".gif")
-            logger.debug("temp file: ${tempFile.absolutePath}")
-            tempFile.writeBytes(finalPic.toByteArray())
-
-//            val temp = ImageIO.read(ByteArrayInputStream(finalPic.toByteArray()))
-//            val x = temp.toExternalImage("GIF")
-//            x.sendTo(groupMessage.group)
-            groupMessage.group.sendImage(tempFile)
+        this.lastPicUrl = colorUrl
+        val image = this.getImage(colorUrl)
+        if (image != null) {
+            val mosaicImage = ColorPicUtil.doMosaic(image)
+            groupMessage.group.sendImage(mosaicImage)
             groupMessage.group.sendMessage(buildMessageChain {
                 add(
                     "Author: $author\nTitle: $title\nPixivId: $pid\nTags: $readableTags\n" +
@@ -135,8 +170,6 @@ class ColorPicCmd : ICommand {
                             "原图链接：$colorUrl"
                 )
             })
-
-            tempFile.delete()
         }
     }
 
