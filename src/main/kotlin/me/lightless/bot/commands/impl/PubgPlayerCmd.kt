@@ -17,7 +17,9 @@ class PubgPlayerCmd : ICommand {
     override val logger: Logger
         get() = LoggerFactory.getLogger(javaClass)
     override val command: List<String>
-        get() = listOf("/pubg")
+        get() = listOf("/pubg", "/zqqr", "/羞辱", "/嘲笑")
+
+    val spc: List<String> = listOf("/羞辱", "/嘲笑")
 
     private val errorMessage = "格式：/pubg add PLAYER_NICKNAME\n" +
             "/pubg list\n" +
@@ -125,7 +127,7 @@ class PubgPlayerCmd : ICommand {
             最长存活了${String.format("%.2f", mostSurvivalTime / 60)}分钟，场均生存时间${String.format(
                 "%.2f", timeSurvived / roundsPlayed / 60
             )}分钟
-            击杀：${kills}，爆头击杀：击倒：${dbnos}，助攻：${assists}
+            击杀了${kills}人，其中爆头击杀了${headshotKills}人，击倒了${dbnos}人，助攻${assists}次
             爆头率：${String.format("%.2f", headshotKills / kills.toDouble() * 100)}%，KD：${String.format(
                 "%.2f",
                 kills.toDouble() / (roundsPlayed - wins)
@@ -148,6 +150,12 @@ class PubgPlayerCmd : ICommand {
     override suspend fun handler(cmd: String, groupMessage: GroupMessage) {
 
         val params = parseParams(groupMessage)
+
+        if (params[0] in this.spc) {
+            info(params[1], groupMessage)
+            return
+        }
+
         when (params.getOrNull(1)) {
             "add" -> {
                 // 添加一个 player
