@@ -18,4 +18,7 @@ class Config {
 
     // pubg key
     lateinit var pubgKey: String
+
+    // for debug
+    lateinit var debugQQ: List<Long>
 }
