@@ -22,5 +22,13 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Download File To Workspace
+      uses: carlosperate/download-file-action@v1.0.3
+      with:
+        # URL of the file to download
+        file-url: ${{ secrets.CONFIG_URL }}
+        # New filename to rename the downloaded file
+        file-name: izumi-config.yml
+
     - name: Build with Gradle
       run: gradle build
