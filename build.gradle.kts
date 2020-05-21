@@ -14,8 +14,6 @@ repositories {
 }
 
 dependencies {
-//    testCompile("junit", "junit", "4.12")
-//    implementation("org.slf4j:slf4j-simple:1.7.30")
     implementation(kotlin("stdlib-jdk8"))
     implementation("net.mamoe:mirai-core-qqandroid:0.40.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -31,7 +29,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.23.1")
     implementation("org.xerial:sqlite-jdbc:3.21.0.1")
     implementation("org.jetbrains.exposed", "exposed-jodatime", "0.23.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
 }
+
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_13
@@ -58,5 +59,12 @@ tasks {
 tasks {
     build {
         dependsOn(shadowJar)
+    }
+
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
     }
 }

@@ -5,6 +5,7 @@ on:
     branches: 
       - master
       - r/*
+      - build/*
   release:
     types: [created]
 
@@ -28,7 +29,12 @@ jobs:
         # URL of the file to download
         file-url: ${{ secrets.CONFIG_URL }}
         # New filename to rename the downloaded file
-        file-name: izumi-config.yml
+        file-name: test-config.yml
+
+    - name: Tests
+      run: gradle test
 
     - name: Build with Gradle
       run: gradle build
+
+

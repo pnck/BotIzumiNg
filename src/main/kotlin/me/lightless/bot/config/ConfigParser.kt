@@ -1,6 +1,5 @@
 package me.lightless.bot.config
 
-import me.lightless.bot.BotContext
 import org.slf4j.LoggerFactory
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
@@ -33,7 +32,7 @@ class ConfigParser(private val filename: String) {
         /**
          * 从外部加载配置文件，非resource内的配置文件
          */
-        val cwd = BotContext.cwd ?: return null
+        val cwd = System.getProperty("user.dir")
         val configPath = Paths.get(cwd, filename)
         val content: String?
 
@@ -71,10 +70,4 @@ class ConfigParser(private val filename: String) {
     fun getConfig(): Config {
         return config
     }
-}
-
-
-fun main() {
-    val cp = ConfigParser("config.yml")
-    cp.parse()
 }

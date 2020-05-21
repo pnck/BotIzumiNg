@@ -1,49 +1,46 @@
 import kotlinx.coroutines.runBlocking
 import me.lightless.bot.config.Config
+import me.lightless.bot.config.ConfigParser
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
-import org.slf4j.LoggerFactory
+import net.mamoe.mirai.closeAndJoin
+import net.mamoe.mirai.message.recallIn
+import org.junit.jupiter.api.*
 
-// TODO: USE unit test frameworks
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class BotTest {
 
-
-@Suppress("unused")
-class TestFile {
-
-    fun test() {
-        val p = "jar:file:/D:/program/bot-izumi-ng/build/libs/bot-izumi-ng-1.0.0-SNAPSHOT-all.jar!/me/lightless/bot/commands/impl"
-        val p2 = "file:/D:/program/bot-izumi-ng/build/libs/bot-izumi-ng-1.0.0-SNAPSHOT-all.jar"
-
-        val x = javaClass.protectionDomain.codeSource.location.path
-        println("x: $x")
-    }
-}
-
-class TestLoginAndEcho constructor(loginQQ: Long, loginPassword: String, reportTo: Long) {
-    val logger = LoggerFactory.getLogger("Test")
-    val config = Config()
+    private val config: Config
+    private lateinit var bot: Bot
 
     init {
-        config.qqNumber = loginQQ
-        config.debugQQ = List<Long>(1) { reportTo }
-        config.qqPassword = loginPassword
+        val cfg = ConfigParser("test-config.yml").parseExternalConfig()
+        Assertions.assertNotNull(cfg)
+        config = cfg!!
     }
 
-    suspend fun test() {
-        val bot = Bot(
-            config.qqNumber,
-            config.qqPassword
-        ).alsoLogin()
-        config.debugQQ.forEach {
-            logger.info("echo to $it")
-            bot.friends[it].sendMessage("[izumi] it works")
-            logger.info("echo to $it done")
+    @BeforeAll
+    fun setUp() {
+        runBlocking {
+            bot = Bot(
+                config.qqNumber,
+                config.qqPassword
+            ).alsoLogin()
         }
-    }
-}
 
-fun main(args: Array<String>) {
-    runBlocking {
-        TestLoginAndEcho(args[0].toLong(), args[1], args[2].toLong()).test()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        runBlocking { bot.closeAndJoin() }
+    }
+
+    @Test
+    fun testEcho() {
+        runBlocking {
+            config.debugQQ.forEach {
+                val receipt = bot.friends[it].sendMessage("[izumi] it works")
+            }
+        }
     }
 }
