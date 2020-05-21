@@ -36,5 +36,10 @@ jobs:
 
     - name: Build with Gradle
       run: gradle build
+    
+    - name: Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        path: build/
 
 
