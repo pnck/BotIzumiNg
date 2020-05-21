@@ -11,7 +11,28 @@ on:
 
 jobs:
   build:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 13
+      uses: actions/setup-java@v1
+      with:
+        java-version: 13
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Build with Gradle
+      run: gradle build
+    
+    - name: Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        path: build/
+
+  test:
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -33,13 +54,3 @@ jobs:
 
     - name: Tests
       run: gradle test
-
-    - name: Build with Gradle
-      run: gradle build
-    
-    - name: Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        path: build/
-
-
