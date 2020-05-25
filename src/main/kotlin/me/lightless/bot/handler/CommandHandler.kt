@@ -1,5 +1,8 @@
 package me.lightless.bot.handler
 
+import common.Trie
+import common.get
+import common.set
 import me.lightless.bot.commands.ICommand
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
@@ -14,7 +17,7 @@ import kotlin.reflect.full.createInstance
 class CommandHandler {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    var commandsImpls: MutableList<ICommand> = arrayListOf()
+    private val commandsImpls = Trie<Char>()
     private val commandPackageName = "me.lightless.bot.commands.impl"
     private val commandPackagePath = commandPackageName.replace(".", "/")
 
@@ -25,15 +28,14 @@ class CommandHandler {
         val cnt = loadCommands()
         logger.info(
             "Commands class count: $cnt, command list: " +
-                    commandsImpls.flatMap { it.command }.joinToString(
-                        ", ", prefix = "[", postfix = "]"
-                    )
+                    commandsImpls.entries.joinToString(
+                        ";\n", prefix = "\n[\n", postfix = "\n]"
+                    ) { "  \"${it.key.joinToString("")}\" -> ${it.value}" }
         )
     }
 
     // TODO: 改成 utils 里封装好的方法
     private fun loadCommands(): Int {
-        var cnt = 0
         val clazzArray: MutableList<String> = arrayListOf()
         val jarFile = File(javaClass.protectionDomain.codeSource.location.path)
         if (jarFile.isFile) {
@@ -77,11 +79,13 @@ class CommandHandler {
         logger.debug("clazzArray: $clazzArray")
 
         clazzArray.forEach {
-            commandsImpls.add(Class.forName(it).kotlin.createInstance() as ICommand)
-            cnt += 1
+            val cmd = Class.forName(it).kotlin.createInstance() as ICommand
+            cmd.command.forEach { prefix ->
+                commandsImpls[prefix] = cmd
+            }
         }
 
-        return cnt
+        return commandsImpls.size
     }
 
 
@@ -91,19 +95,16 @@ class CommandHandler {
         val msg = message.firstOrNull(PlainText).toString().trim()
         val msgArray = msg.split("""\s+""".toRegex())
 
-        var findCommand = false
-        commandsImpls.forEach {
-            if (it.command.contains(msgArray[0]) && it.checkRole(groupMessage.sender.id)) {
-                it.handler(msgArray[0], groupMessage)
-                findCommand = true
+        when (val cmd = commandsImpls[msgArray[0]]) {
+            is ICommand -> {
+                cmd.handler(msgArray[0], groupMessage)
             }
-        }
-
-        if (!findCommand) {
-            groupMessage.group.sendMessage(buildMessageChain {
-                add(At(groupMessage.sender))
-                add("\nUnknown Command!")
-            })
+            else -> {
+                groupMessage.group.sendMessage(buildMessageChain {
+                    add(At(groupMessage.sender))
+                    add("\nUnknown Command!")
+                })
+            }
         }
     }
 }
