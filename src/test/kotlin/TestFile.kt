@@ -39,7 +39,7 @@ internal class BotTest {
     fun testEcho() {
         runBlocking {
             config.debugQQ.forEach {
-                val receipt = bot.friends[it].sendMessage("[izumi] it works")
+                bot.friends[it].sendMessage("[izumi] it works")
             }
         }
     }
