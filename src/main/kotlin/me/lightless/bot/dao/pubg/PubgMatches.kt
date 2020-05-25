@@ -1,4 +1,4 @@
-package me.lightless.bot.dao
+package me.lightless.bot.dao.pubg
 
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass

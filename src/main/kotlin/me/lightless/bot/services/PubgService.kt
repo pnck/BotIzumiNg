@@ -1,6 +1,6 @@
 package me.lightless.bot.services
 
-import me.lightless.bot.dao.*
+import me.lightless.bot.dao.pubg.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 

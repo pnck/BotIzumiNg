@@ -1,4 +1,4 @@
-package me.lightless.bot.dao
+package me.lightless.bot.dao.pubg
 
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -48,7 +48,9 @@ object PubgSeasonDetailModel : LongIdTable("pubg_season_detail") {
 
 
 class PubgSeasonDetailDAO(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<PubgSeasonDetailDAO>(PubgSeasonDetailModel)
+    companion object : LongEntityClass<PubgSeasonDetailDAO>(
+        PubgSeasonDetailModel
+    )
 
     var season by PubgSeasonDetailModel.season
     var playerId by PubgSeasonDetailModel.playerId

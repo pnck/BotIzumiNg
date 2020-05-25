@@ -3,9 +3,9 @@ package me.lightless.bot
 import kotlinx.coroutines.runBlocking
 import me.lightless.bot.config.Config
 import me.lightless.bot.config.ConfigParser
-import me.lightless.bot.dao.PubgMatchesModel
-import me.lightless.bot.dao.PubgPlayerModel
-import me.lightless.bot.dao.PubgSeasonDetailModel
+import me.lightless.bot.dao.pubg.PubgMatchesModel
+import me.lightless.bot.dao.pubg.PubgPlayerModel
+import me.lightless.bot.dao.pubg.PubgSeasonDetailModel
 import me.lightless.bot.timers.TimerLoader
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.alsoLogin
@@ -15,8 +15,6 @@ import net.mamoe.mirai.event.subscribeGroupMessages
 import net.mamoe.mirai.join
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
