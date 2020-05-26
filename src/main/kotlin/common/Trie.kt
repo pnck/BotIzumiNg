@@ -1,15 +1,19 @@
 package common
 
-internal data class TrieNode<ElementT>(val curIndex: ElementT?, var value: Any?) {
-    var children: MutableMap<ElementT, TrieNode<ElementT>> = mutableMapOf<ElementT, TrieNode<ElementT>>()
+internal data class TrieNode<ET, VT>(val curIndex: ET?, var value: VT?) {
+    var children: MutableMap<ET, TrieNode<ET, VT>> = mutableMapOf()
 }
 
-typealias TheEntryType<T> = MutableMap.MutableEntry<List<T>, Any>
+typealias TheEntryType<T, U> = MutableMap.MutableEntry<List<T>, U>
 
-internal class TrieIterator<ElementT>(root: TrieNode<ElementT>) : MutableIterator<TheEntryType<ElementT>> {
-    private var lastNode: TrieNode<ElementT> = root
-    private var lastIndex: ElementT? = null
-    private fun yieldNext(stackNode: TrieNode<ElementT>, seq: List<ElementT>): Iterator<TheEntryType<ElementT>> =
+internal class TrieIterator<ET, VT>(root: TrieNode<ET, VT>) :
+    MutableIterator<TheEntryType<ET, VT>> {
+    private var lastNode: TrieNode<ET, VT> = root
+    private var lastIndex: ET? = null
+    private fun yieldNext(
+        stackNode: TrieNode<ET, VT>,
+        seq: List<ET>
+    ): Iterator<TheEntryType<ET, VT>> =
         iterator {
             lastNode = stackNode
             for ((e, node) in stackNode.children) {
@@ -28,7 +32,7 @@ internal class TrieIterator<ElementT>(root: TrieNode<ElementT>) : MutableIterato
         return internalIter.hasNext()
     }
 
-    override operator fun next(): MutableMap.MutableEntry<List<ElementT>, Any> {
+    override operator fun next(): MutableMap.MutableEntry<List<ET>, VT> {
         return internalIter.next()
     }
 
@@ -38,15 +42,15 @@ internal class TrieIterator<ElementT>(root: TrieNode<ElementT>) : MutableIterato
 
 }
 
-class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
-    private val root = TrieNode<ElementT>(null, null)
+open class Trie<ET, VT : Any> : MutableMap<List<ET>, VT> {
+    private val root = TrieNode<ET, VT>(null, null)
     override val size: Int
         get() = this.iterator().asSequence().toSet().size
-    override val entries: MutableSet<TheEntryType<ElementT>>
+    override val entries: MutableSet<TheEntryType<ET, VT>>
         get() = this.iterator().asSequence().toMutableSet()
-    override val keys: MutableSet<List<ElementT>>
+    override val keys: MutableSet<List<ET>>
         get() = this.iterator().asSequence().map { it.key }.toMutableSet()
-    override val values: MutableCollection<Any>
+    override val values: MutableCollection<VT>
         get() = this.iterator().asSequence().map { it.value }.toMutableSet()
 
     override fun isEmpty(): Boolean {
@@ -57,11 +61,11 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
         root.children.clear()
     }
 
-    operator fun iterator(): MutableIterator<TheEntryType<ElementT>> {
+    open operator fun iterator(): MutableIterator<TheEntryType<ET, VT>> {
         return TrieIterator(root)
     }
 
-    fun insert(seq: Collection<ElementT>, value: Any): Trie<ElementT> {
+    open fun insert(seq: Collection<ET>, value: VT): Trie<ET, VT> {
         if (seq.isEmpty()) {
             return this
         }
@@ -69,7 +73,7 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
         seq.forEach { e ->
             val next = cur.children[e]
             if (next == null) {
-                val t = TrieNode<ElementT>(e, null)
+                val t = TrieNode<ET, VT>(e, null)
                 cur.children[e] = t
                 cur = t
             } else {
@@ -80,7 +84,7 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
         return this
     }
 
-    fun searchIdentical(seq: List<ElementT>): Any? {
+    open fun searchIdentical(seq: List<ET>): VT? {
         var cur = root
         seq.forEach { e ->
             val next = cur.children[e] ?: return null
@@ -89,8 +93,8 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
         return cur.value
     }
 
-    fun searchPrefix(seq: List<ElementT>): Map<List<ElementT>, Any> {
-        val result = mutableMapOf<List<ElementT>, Any>()
+    open fun searchPrefix(seq: List<ET>): Map<List<ET>, VT> {
+        val result = mutableMapOf<List<ET>, VT>()
         run {
             var cur = root
             seq.forEach { e ->
@@ -102,7 +106,7 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
                 result[seq] = cur.value!!
             }
 
-            fun addAll(stackNode: TrieNode<ElementT>, curSeq: List<ElementT>) {
+            fun addAll(stackNode: TrieNode<ET, VT>, curSeq: List<ET>) {
                 for ((e, node) in stackNode.children) {
                     val nextSeq = curSeq + e
                     if (node.value != null) {
@@ -117,16 +121,33 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
         return result
     }
 
-    override fun remove(key: List<ElementT>): Boolean {
+    override fun remove(key: List<ET>): VT? {
         var cur = root
-        var doRemove = { -> false }
+        var doRemove: () -> VT? = { -> null }
         key.forEach { e ->
-            val next = cur.children[e] ?: return false
-            if (cur.children.size > 1) {
-                val captured = cur
+            val next = cur.children[e] ?: return null
+            val removing = next
+            // do recursive remove
+            // if branched here, capture the remove operation into closure
+            // so that it can be invoked later after removed child
+            val captured = cur
+            if (cur.children.size == 1 /*orphan*/) {
+                val doLastRemove = doRemove
                 doRemove = {
                     captured.children.remove(e)
-                    true
+                    // recursively remove the parent node
+                    // since the removing is the last leaf node
+                    // return value of doLastRemove should be ignored
+                    doLastRemove()
+                    removing.value
+                }
+            } else {
+                // last doRemove is removing a branched sub tree
+                // should be reset and try doRemove the single branch
+                doRemove = {
+                    captured.children.remove(e)
+                    // no more recursive doLastRemove
+                    removing.value
                 }
             }
             cur = next
@@ -135,76 +156,76 @@ class Trie<ElementT> : MutableMap<List<ElementT>, Any> {
     }
 
 
-    override fun containsKey(key: List<ElementT>): Boolean {
+    override fun containsKey(key: List<ET>): Boolean {
         return searchIdentical(key) != null
     }
 
-    operator fun contains(key: List<ElementT>): Boolean {
+    operator fun contains(key: List<ET>): Boolean {
         return containsKey(key)
     }
 
-    override fun containsValue(value: Any): Boolean {
+    override fun containsValue(value: VT): Boolean {
         return values.contains(value)
     }
 
-    override operator fun get(key: List<ElementT>): Any? {
+    override operator fun get(key: List<ET>): VT? {
         return searchIdentical(key)
     }
 
-    override fun put(key: List<ElementT>, value: Any): Any? {
+    override fun put(key: List<ET>, value: VT): VT? {
         val r = searchIdentical(key)
         if (r != null) return r
         insert(key, value)
         return null
     }
 
-    override fun putAll(from: Map<out List<ElementT>, Any>) {
+    override fun putAll(from: Map<out List<ET>, VT>) {
         from.forEach { (key, value) -> put(key, value) }
     }
 
-    operator fun set(key: List<ElementT>, value: Any) {
+    operator fun set(key: List<ET>, value: VT) {
         insert(key, value)
     }
 }
 
-fun Trie<Char>.insert(word: String, value: Any): Trie<Char> {
+inline fun <reified VT : Any> Trie<Char, VT>.insert(word: String, value: VT): Trie<Char, VT> {
     return insert(word.toList(), value)
 }
 
-fun Trie<Char>.searchIdentical(word: String): Any? {
+inline fun <reified VT : Any> Trie<Char, VT>.searchIdentical(word: String): VT? {
     return searchIdentical(word.toList())
 }
 
-fun Trie<Char>.searchPrefix(word: String): Map<String, Any> {
-    val ret = mutableMapOf<String, Any>()
-    searchPrefix(word.toList()).forEach { (k, v) -> ret[k.joinToString("")] = v }
+inline fun <reified VT : Any> Trie<Char, VT>.searchPrefix(word: String): Map<String, VT> {
+    val ret = mutableMapOf<String, VT>()
+    searchPrefix(word.toList()).forEach { (k, v) -> ret[k.joinToString("")] = v as VT }
     return ret
 }
 
-fun Trie<Char>.remove(word: String): Boolean {
+inline fun <reified VT : Any> Trie<Char, VT>.remove(word: String): VT? {
     return remove(word.toList())
 }
 
-fun Trie<Char>.containsKey(word: String): Boolean {
+inline fun <reified VT : Any> Trie<Char, VT>.containsKey(word: String): Boolean {
     return containsKey(word.toList())
 }
 
-operator fun Trie<Char>.contains(word: String): Boolean {
+inline operator fun <reified VT : Any> Trie<Char, VT>.contains(word: String): Boolean {
     return contains(word.toList())
 }
 
-operator fun Trie<Char>.get(word: String): Any? {
+inline operator fun <reified VT : Any> Trie<Char, VT>.get(word: String): VT? {
     return get(word.toList())
 }
 
-operator fun Trie<Char>.set(word: String, value: Any) {
+inline operator fun <reified VT : Any> Trie<Char, VT>.set(word: String, value: VT) {
     set(word.toList(), value)
 }
 
-fun Trie<Char>.put(word: String, value: Any): Any? {
+inline fun <reified VT : Any> Trie<Char, VT>.put(word: String, value: VT): VT? {
     return put(word.toList(), value)
 }
 
-fun Trie<Char>.putAll(from: Map<String, Any>) {
+inline fun <reified VT : Any> Trie<Char, VT>.putAll(from: Map<String, VT>) {
     from.forEach { (key, value) -> put(key, value) }
 }

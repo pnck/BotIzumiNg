@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test
 
 internal class TrieTest {
     @Test
+    @Suppress("UNCHECKED_CAST")
     fun testTrie() {
-        val trie = Trie<Char>()
+        val trie = Trie<Char,Any>()
         trie.insert("", 1)
         Assertions.assertTrue(trie.isEmpty())
         Assertions.assertEquals(0, trie.size)
@@ -29,11 +30,12 @@ internal class TrieTest {
         Assertions.assertTrue(trie.searchPrefix("!").isEmpty())
 
         // Round2
+        val ret1 = { 1 }
         trie.insert("toast", 1)
             .putAll(
                 mapOf<List<Char>, Any>(
                     Pair("ester".toList(), listOf(1, 2, 3)),
-                    Pair("wW".toList(), { 1 })
+                    Pair("wW".toList(), ret1)
                 )
             )
 
@@ -63,7 +65,6 @@ internal class TrieTest {
         Assertions.assertEquals("OK", v5["test"])
         Assertions.assertEquals(1, v5["toast"])
         Assertions.assertEquals(listOf(1, 2, 3), v5["ester"])
-        @Suppress("UNCHECKED_CAST")
         Assertions.assertEquals(1, (v5["wW"] as () -> Int)())
 
         // Map interfaces
@@ -89,14 +90,15 @@ internal class TrieTest {
         trie.clear()
         Assertions.assertTrue(trie.isEmpty())
         Assertions.assertEquals(0, trie.size)
-        trie["/c"] = 1
-        trie["/cmd".toList()] = 2
+        trie["/c"] = ret1
+        trie["/cmd".toList()] = ret1
         trie.putAll(mapOf(Pair("/show", 3), Pair("/list", 4)))
         Assertions.assertTrue(trie.containsKey("/c"))
         Assertions.assertTrue("/cmd" in trie)
         Assertions.assertEquals(4, trie.size)
-        Assertions.assertEquals(1, trie["/c"])
-        Assertions.assertEquals(2, trie["/cmd"])
+        Assertions.assertEquals(3, trie.values.size)
+        Assertions.assertEquals(1, (trie["/c"] as () -> Int)())
+        Assertions.assertEquals(1, (trie["/cmd"] as () -> Int)())
         Assertions.assertEquals(3, trie["/show"])
         Assertions.assertEquals(4, trie["/list"])
     }
