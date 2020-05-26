@@ -6,7 +6,7 @@ import com.beust.klaxon.Parser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.lightless.bot.BotContext
-import me.lightless.bot.commands.ICommand
+import me.lightless.bot.commands.ILegacyCommand
 import me.lightless.bot.utils.ColorPicUtil
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
@@ -21,7 +21,7 @@ import java.net.Proxy
 import java.net.URL
 import javax.imageio.ImageIO
 
-class ColorPicCmd : ICommand {
+class ColorPicCmd : ILegacyCommand {
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
     override val command: List<String> = listOf("/冲", "/涩图", "/还没好", "/不够涩", "/还有吗", "/r18")
     private val r18Command = listOf("/r18")

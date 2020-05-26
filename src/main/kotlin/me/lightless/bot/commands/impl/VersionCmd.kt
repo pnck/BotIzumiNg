@@ -1,13 +1,13 @@
 package me.lightless.bot.commands.impl
 
-import me.lightless.bot.commands.ICommand
+import me.lightless.bot.commands.ILegacyCommand
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.buildMessageChain
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class VersionCmd() : ICommand {
+class VersionCmd() : ILegacyCommand {
 
     override val logger: Logger = LoggerFactory.getLogger(javaClass)
     override val command: List<String> = listOf("/version", "/about")

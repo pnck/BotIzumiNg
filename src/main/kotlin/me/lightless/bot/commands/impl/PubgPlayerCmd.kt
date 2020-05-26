@@ -3,7 +3,7 @@ package me.lightless.bot.commands.impl
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import io.ktor.util.KtorExperimentalAPI
-import me.lightless.bot.commands.ICommand
+import me.lightless.bot.commands.ILegacyCommand
 import me.lightless.bot.services.PubgService
 import me.lightless.bot.utils.PubgApi
 import net.mamoe.mirai.message.GroupMessage
@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class PubgPlayerCmd : ICommand {
+class PubgPlayerCmd : ILegacyCommand {
     override val logger: Logger
         get() = LoggerFactory.getLogger(javaClass)
     override val command: List<String>
