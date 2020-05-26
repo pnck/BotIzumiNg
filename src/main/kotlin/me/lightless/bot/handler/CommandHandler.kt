@@ -4,6 +4,7 @@ import common.Trie
 import common.get
 import common.set
 import me.lightless.bot.commands.ICommand
+import me.lightless.bot.commands.ILegacyCommand
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
 import net.mamoe.mirai.message.data.PlainText
@@ -17,7 +18,7 @@ import kotlin.reflect.full.createInstance
 class CommandHandler {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val commandsImpls = Trie<Char>()
+    private val commandsImpls = Trie<Char, ICommand>()
     private val commandPackageName = "me.lightless.bot.commands.impl"
     private val commandPackagePath = commandPackageName.replace(".", "/")
 
@@ -79,10 +80,15 @@ class CommandHandler {
         logger.debug("clazzArray: $clazzArray")
 
         clazzArray.forEach {
-            val cmd = Class.forName(it).kotlin.createInstance() as ICommand
-            cmd.command.forEach { prefix ->
-                commandsImpls[prefix] = cmd
+            when (val cmd = Class.forName(it).kotlin.createInstance() as ICommand) {
+                is ILegacyCommand -> cmd.command.forEach { prefix ->
+                    commandsImpls[prefix] = cmd
+                }
+                else -> {
+
+                }
             }
+
         }
 
         return commandsImpls.size
@@ -96,7 +102,7 @@ class CommandHandler {
         val msgArray = msg.split("""\s+""".toRegex())
 
         when (val cmd = commandsImpls[msgArray[0]]) {
-            is ICommand -> {
+            is ILegacyCommand -> {
                 cmd.handler(msgArray[0], groupMessage)
             }
             else -> {
