@@ -4,6 +4,7 @@ import common.Trie
 import common.get
 import common.set
 import me.lightless.bot.commands.ICommand
+import me.lightless.bot.commands.ICompositeCommand
 import me.lightless.bot.commands.ILegacyCommand
 import net.mamoe.mirai.message.GroupMessage
 import net.mamoe.mirai.message.data.At
@@ -79,6 +80,7 @@ class CommandHandler {
 
         logger.debug("clazzArray: $clazzArray")
 
+        // register entries
         clazzArray.forEach {
             when (val cmd = Class.forName(it).kotlin.createInstance() as ICommand) {
                 is ILegacyCommand -> cmd.command.forEach { prefix ->
@@ -101,9 +103,16 @@ class CommandHandler {
         val msg = message.firstOrNull(PlainText).toString().trim()
         val msgArray = msg.split("""\s+""".toRegex())
 
+        // dispatch
         when (val cmd = commandsImpls[msgArray[0]]) {
             is ILegacyCommand -> {
                 cmd.handler(msgArray[0], groupMessage)
+            }
+            is ICompositeCommand ->{
+                with( cmd.entries(msgArray[0]) on groupMessage){
+
+                }
+                action.execute()
             }
             else -> {
                 groupMessage.group.sendMessage(buildMessageChain {
